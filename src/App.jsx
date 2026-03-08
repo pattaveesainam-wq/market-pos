@@ -3,6 +3,26 @@ import { supabase } from "./supabase";
 import { DEFAULT_PRODUCTS, CAT_META, CAT_OPTIONS, EMOJI_OPTIONS, COLOR_OPTIONS } from "./defaultProducts";
 
 
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+const fmt     = n => new Intl.NumberFormat("th-TH",{minimumFractionDigits:0,maximumFractionDigits:2}).format(n||0);
+const fmtFull = n => new Intl.NumberFormat("th-TH",{minimumFractionDigits:2,maximumFractionDigits:4}).format(n||0);
+const todayStr= () => new Date().toLocaleDateString("th-TH",{day:"numeric",month:"long",year:"numeric"});
+const timeStr = ts => new Date(ts).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
+const dateKey = d  => new Date(d).toISOString().split("T")[0];
+const thDate  = d  => new Date(d).toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"numeric"});
+
+function getUnits(p) {
+  if (p.cat === "fish" || (p.price_pack10===0 && p.price_tray===0))
+    return [{ name:"ถาด/ตัว", price:p.price_unit, size:1, icon:p.emoji, note:"1 ชิ้น" }];
+  const u = [];
+  if (p.price_tray   > 0) u.push({ name:"ทั้งแผง", price:p.price_tray,   size:30, icon:"📦", note:"30 ฟอง" });
+  if (p.price_pack10 > 0) u.push({ name:"ถุง 10",  price:p.price_pack10, size:10, icon:"🛍️", note:"10 ฟอง" });
+  u.push({ name:"ฟอง", price:p.price_unit, size:1, icon:p.emoji, note:"1 ฟอง" });
+  return u;
+}
+
 const CAT_ORDER = ["chicken","fish","thin","duck","century","salty","custom"];
 
 // ─────────────────────────────────────────────
